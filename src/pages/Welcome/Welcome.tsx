@@ -1,36 +1,62 @@
-import Meta from '@/components/Meta';
-import { FullSizeCenteredFlexBox } from '@/components/styled';
-import useOrientation from '@/hooks/useOrientation';
+import { useEffect, useState } from 'react';
 
-import muiLogo from './logos/mui.svg';
-import pwaLogo from './logos/pwa.svg';
-import reactLogo from './logos/react_ed.svg';
-import recoilLogo from './logos/recoil.svg';
-import rrLogo from './logos/rr.svg';
-import tsLogo from './logos/ts.svg';
-import viteLogo from './logos/vite.svg';
-import { Image } from './styled';
+import { io } from 'socket.io-client';
 
-function Welcome() {
-  const isPortrait = useOrientation();
+const socket = io('http://localhost:3000');
 
-  const width = isPortrait ? '40%' : '30%';
-  const height = isPortrait ? '30%' : '40%';
+function Page1() {
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [lastPong, setLastPong] = useState('');
+  const [name, set_name] = useState('');
+  const [password, set_password] = useState('');
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('connect');
+      setIsConnected(socket.connected);
+    });
+    socket.on('authenticated', () => {
+      console.log('cliente foi autorizado');
+    });
+
+    socket.on('unauthorized', (err) => {
+      console.log('Erro na autenticacao:', err.message);
+    });
+
+    socket.on('reconnecting', (err) => {
+      console.log('reconectando...');
+    });
+
+    socket.on('msg', (data) => {
+      console.log('recebeu mensagem adm:' + JSON.stringify(data));
+      setLastPong('recebeu mensagem adm:' + JSON.stringify(data));
+    });
+    socket.on('normal', (data) => {
+      console.log('recebeu mensagem normal:' + JSON.stringify(data));
+    });
+
+    socket.on('disconnect', () => {
+      console.log('desconectou no servidor');
+      setIsConnected(socket.connected);
+    });
+  }, []);
+
+  const join_room = () => {
+    console.log('join_room');
+    socket.emit('authentication', { username: name, password: password });
+    socket.emit('entraSala', { id: 'salaDisciplinaTOPICOS' });
+    socket.emit('listaSalas', '');
+  };
 
   return (
-    <>
-      <Meta title="Welcome" />
-      <FullSizeCenteredFlexBox flexDirection={isPortrait ? 'column' : 'row'}>
-        <Image alt="react-router" src={rrLogo} />
-        <Image alt="vite" src={viteLogo} />
-        <Image alt="typescript" src={tsLogo} />
-        <Image alt="react" src={reactLogo} sx={{ width, height }} />
-        <Image alt="mui" src={muiLogo} />
-        <Image alt="recoil" src={recoilLogo} />
-        <Image alt="pwa" src={pwaLogo} />
-      </FullSizeCenteredFlexBox>
-    </>
+    <div>
+      <p>Connected: {'' + isConnected}</p>
+      <p>Last pong: {lastPong || '-'}</p>
+      <input type="text" name="name" id="name" onChange={(e) => set_name(e.target.value)} />
+      <input type="password" name="password" id="password" onChange={(e) => set_password(e.target.value)} />
+      <button onClick={join_room}>Send ping</button>
+    </div>
   );
 }
 
-export default Welcome;
+export default Page1;
