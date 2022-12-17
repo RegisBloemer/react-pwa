@@ -11,7 +11,7 @@
     "url": "https://github.com/suren-atoyan/react-pwa/issues",
     "email": "contact@surenatoyan.com"
   },
-  "license": "MIT",
+  "license": "GPT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -27,6 +27,7 @@
     "@mui/material": "^5.10.6",
     "@mui/system": "^5.10.6",
     "@mui/utils": "^5.10.6",
+    "bootstrap": "^5.2.3",
     "is-mobile": "^3.1.1",
     "notistack": "^2.0.5",
     "react": "^18.2.0",

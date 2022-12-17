@@ -7,8 +7,7 @@ const socket = io('http://localhost:3000');
 function Page1() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [lastPong, setLastPong] = useState('');
-  const [name, set_name] = useState('');
-  const [password, set_password] = useState('');
+  const [msg, set_msg] = useState('');
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -41,20 +40,29 @@ function Page1() {
     });
   }, []);
 
-  const join_room = () => {
-    console.log('join_room');
-    socket.emit('authentication', { username: name, password: password });
-    socket.emit('entraSala', { id: 'salaDisciplinaTOPICOS' });
-    socket.emit('listaSalas', '');
+
+  const emit_msg = () => {
+    console.log('emit_msg');
+    socket.emit('msg', msg);
   };
 
   return (
-    <div>
-      <p>Connected: {'' + isConnected}</p>
-      <p>Last pong: {lastPong || '-'}</p>
-      <input type="text" name="name" id="name" onChange={(e) => set_name(e.target.value)} />
-      <input type="password" name="password" id="password" onChange={(e) => set_password(e.target.value)} />
-      <button onClick={join_room}>Send ping</button>
+    <div className="container">
+      <div className="row">
+        <p>Connected: {'' + isConnected}</p>
+        <p>Last pong: {lastPong || '-'}</p>
+        <label className="form-label">MSG</label>
+        <input
+          className="form-control"
+          type="text"
+          name="msg"
+          id="msg"
+          onChange={(e) => set_msg(e.target.value)}
+        />
+        <button className="btn btn-primary" onClick={emit_msg}>
+          Send ping
+        </button>
+      </div>
     </div>
   );
 }
