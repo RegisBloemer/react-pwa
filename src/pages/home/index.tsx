@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useCookies } from 'react-cookie';
 
 import { io } from 'socket.io-client';
 
@@ -8,11 +9,19 @@ function Page1() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [lastPong, setLastPong] = useState('');
   const [msg, set_msg] = useState('');
+  const [salas, set_salas] = useState([
+    [22, false],
+    [42, false],
+    [69, false],
+  ]);
+  const [cookies, set_cookie] = useCookies(['id']);
 
   useEffect(() => {
+    console.log('cookies', cookies);
     socket.on('connect', () => {
       console.log('connect');
       setIsConnected(socket.connected);
+      socket.emit('authentication', { id: cookies.id });
     });
     socket.on('authenticated', () => {
       console.log('cliente foi autorizado');
@@ -40,7 +49,6 @@ function Page1() {
     });
   }, []);
 
-
   const emit_msg = () => {
     console.log('emit_msg');
     socket.emit('msg', msg);
@@ -49,6 +57,7 @@ function Page1() {
   return (
     <div className="container">
       <div className="row">
+        <p>ID: {cookies.id}</p>
         <p>Connected: {'' + isConnected}</p>
         <p>Last pong: {lastPong || '-'}</p>
         <label className="form-label">MSG</label>
@@ -62,6 +71,32 @@ function Page1() {
         <button className="btn btn-primary" onClick={emit_msg}>
           Send ping
         </button>
+
+        <ul className="list-group list-group-flush list-group-numbered">
+          {salas
+            ? salas.map((e, i) => {
+                return (
+                  <li
+                    key={i}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    Sala {e[0]}{' '}
+                    <button
+                      className="btn btn-primary rounded-pill"
+                      onClick={() => {
+                        const status = !salas[i][1];
+                        salas[i][1] = status;
+                        set_salas([...salas]);
+                        socket.emit('room', [i, status]);
+                      }}
+                    >
+                      {e[1] ? 'Aberto' : 'Fechada'}
+                    </button>
+                  </li>
+                );
+              })
+            : null}
+        </ul>
       </div>
     </div>
   );

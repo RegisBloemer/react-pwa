@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
 
-function Page1() {
+function Register() {
   const navigate = useNavigate();
   const [email, set_email] = useState('');
   const [password, set_password] = useState('');
   const [cookies, set_cookie] = useCookies(['id']);
-
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -17,7 +16,7 @@ function Page1() {
     console.log('pass', password);
 
     try {
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('http://localhost:3000/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +49,7 @@ function Page1() {
       <form className="needs-validation" id="form" onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="email-i" className="form-label">
-            Endereço de e-mail
+            Endereço de Email
           </label>
           <input
             type="email"
@@ -62,7 +61,7 @@ function Page1() {
             required
           />
           <div className="valid-feedback">Parece bom!</div>
-          <div className="invalid-feedback">Por favor insira um e-mail válido</div>
+          <div className="invalid-feedback">Por favor ensira um e-mail válida!</div>
         </div>
         <div className="mb-3">
           <label htmlFor="pass-i" className="form-label">
@@ -77,14 +76,14 @@ function Page1() {
             required
           />
           <div className="valid-feedback">Parece bom!</div>
-          <div className="invalid-feedback">Por favor insira uma senha válida</div>
+          <div className="invalid-feedback">Por favor ensira uma senha válida!</div>
         </div>
         <button type="submit" className="btn btn-primary">
-          Enviar
+          Registrar-se
         </button>
       </form>
     </main>
   );
 }
 
-export default Page1;
+export default Register;

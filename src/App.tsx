@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { CookiesProvider } from 'react-cookie';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
@@ -18,22 +19,24 @@ import ThemeProvider from '@/theme/Provider';
 
 function App() {
   return (
-    <RecoilRoot>
-      <HelmetProvider>
-        <ThemeProvider>
-          <Fragment>
-            <CssBaseline />
-            <Notifications />
-            <HotKeys />
-            <SW />
-            <BrowserRouter>
-              <Header />
-              <Pages />
-            </BrowserRouter>
-          </Fragment>
-        </ThemeProvider>
-      </HelmetProvider>
-    </RecoilRoot>
+    <CookiesProvider>
+      <RecoilRoot>
+        <HelmetProvider>
+          <ThemeProvider>
+            <Fragment>
+              <CssBaseline />
+              <Notifications />
+              <HotKeys />
+              <SW />
+              <BrowserRouter>
+                <Header />
+                <Pages />
+              </BrowserRouter>
+            </Fragment>
+          </ThemeProvider>
+        </HelmetProvider>
+      </RecoilRoot>
+    </CookiesProvider>
   );
 }
 
