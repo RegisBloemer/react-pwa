@@ -1,77 +1,59 @@
 import { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
 
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3000');
 
 function Page1() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [lastPong, setLastPong] = useState('');
-  const [msg, set_msg] = useState('');
+  const navigate = useNavigate();
   const [salas, set_salas] = useState([
     [22, false],
     [42, false],
     [69, false],
   ]);
+
   const [cookies, set_cookie] = useCookies(['id']);
 
   useEffect(() => {
     console.log('cookies', cookies);
-    socket.on('connect', () => {
-      console.log('connect');
-      setIsConnected(socket.connected);
-      socket.emit('authentication', { id: cookies.id });
-    });
-    socket.on('authenticated', () => {
-      console.log('cliente foi autorizado');
-    });
+    if (cookies.id) {
+      socket.on('connect', () => {
+        console.log('connect');
 
-    socket.on('unauthorized', (err) => {
-      console.log('Erro na autenticacao:', err.message);
-    });
+        socket.emit('authentication', { id: cookies.id });
+      });
+      socket.on('authenticated', () => {
+        console.log('cliente foi autorizado');
+      });
 
-    socket.on('reconnecting', (err) => {
-      console.log('reconectando...');
-    });
+      socket.on('unauthorized', (err) => {
+        console.log('Erro na autenticacao:', err.message);
+        navigate('/login');
+      });
 
-    socket.on('msg', (data) => {
-      console.log('recebeu mensagem adm:' + JSON.stringify(data));
-      setLastPong('recebeu mensagem adm:' + JSON.stringify(data));
-    });
-    socket.on('normal', (data) => {
-      console.log('recebeu mensagem normal:' + JSON.stringify(data));
-    });
+      socket.on('reconnecting', (err) => {
+        console.log('reconectando...');
+      });
 
-    socket.on('disconnect', () => {
-      console.log('desconectou no servidor');
-      setIsConnected(socket.connected);
-    });
+      socket.on('room', (data) => {
+        console.log('room:', data);
+        salas[data[0]][1] = data[1];
+        set_salas([...salas]);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('desconectou no servidor');
+      });
+    } else {
+      navigate('/login');
+    }
   }, []);
-
-  const emit_msg = () => {
-    console.log('emit_msg');
-    socket.emit('msg', msg);
-  };
 
   return (
     <div className="container">
       <div className="row">
-        <p>ID: {cookies.id}</p>
-        <p>Connected: {'' + isConnected}</p>
-        <p>Last pong: {lastPong || '-'}</p>
-        <label className="form-label">MSG</label>
-        <input
-          className="form-control"
-          type="text"
-          name="msg"
-          id="msg"
-          onChange={(e) => set_msg(e.target.value)}
-        />
-        <button className="btn btn-primary" onClick={emit_msg}>
-          Send ping
-        </button>
-
         <ul className="list-group list-group-flush list-group-numbered">
           {salas
             ? salas.map((e, i) => {
